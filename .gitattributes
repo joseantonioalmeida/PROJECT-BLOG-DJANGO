@@ -1,0 +1,3 @@
+# Forçar que arquivos de script e Docker sempre usem LF, mesmo no Windows
+Dockerfile text eol=lf
+scripts/*.sh text eol=lf
