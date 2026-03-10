@@ -32,7 +32,34 @@ class Category(models.Model):
         unique=True, default=None, null=True, blank=True, max_length=255,
     )
 
+    def __str__(self):
+        return self.name
+    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify_new(self.name, 4)
+        return super().save(*args, **kwargs)
+
+class Page(models.Model):
+    class Meta:
+        verbose_name = 'Page'
+        verbose_name_plural = 'Pages'
+
+    title = models.CharField(max_length=65)
+    slug = models.SlugField(
+        unique=True, default='', null=False, blank=True, max_length=255
+    )
+    is_published = models.BooleanField(
+        default=False,
+        help_text='Este campo precisará estar marcado para a pagina ser exibida publicamente.'
+        )
+    content = models.TextField()
+
+    def __str__(self):
+        return self.title
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify_new(self.title, 4)
         return super().save(*args, **kwargs)
