@@ -39,11 +39,11 @@
               {% for link in site_setup.menulink_set.all %}   
                 <li class="menu-item">
                   {% if link.new_tab %}
-                    <a target='_blank' class="menu-link" href="{{ linkurl_or_path}}">
+                    <a target='_blank' class="menu-link" href="{{ link.url_or_path}}">
                       {{ link.text }}
                     </a>                
                   {% else %}
-                    <a class="menu-link" href="{{ linkurl_or_path}}">
+                    <a class="menu-link" href="{{ link.url_or_path}}">
                       {{ link.text }}
                     </a>
                   {% endif %}

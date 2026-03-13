@@ -81,6 +81,13 @@ class Page(models.Model):
         )
     content = models.TextField()
 
+    def get_absolute_url(self):
+        # return reverse("model_detail", kwargs={"pk": self.pk})
+        if not self.is_published:
+            return reverse('blog:index')
+        return reverse('blog:page', args=(self.slug,))
+
+
     def __str__(self):
         return self.title
     
