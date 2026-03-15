@@ -63,50 +63,24 @@ class CreatedByListView(PostListView):
        qs = super().get_queryset()
        qs = qs.filter(created_by__pk=self._temp_context['user'].pk)
        return qs
-def created_by(request, author_pk):
-    user = User.objects.filter(pk=author_pk).first()
 
-    if user is None:
-        raise Http404()
-    
-    if user.first_name:
-        user_full_name = f'{user.first_name} {user.last_name}'
-    page_title = 'Posts de '+ user_full_name + ' - ' #type:ignore
 
-    posts = Post.objects.get_published().filter(created_by__pk=author_pk) #type:ignore
-    paginator = Paginator(posts, PER_PAGE)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': page_obj,
-            'page_title': page_title,
-        }
-    )
-
-def category(request, slug):
-    posts = Post.objects.get_published().filter(category__slug=slug) #type:ignore
-    
-    paginator = Paginator(posts, PER_PAGE)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    if len(page_obj) == 0:
-        raise Http404()
-
-    page_title = f'Posts da categoria {page_obj[0].category.name} - '
-
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': page_obj,
-            'page_title': page_title,
-        }
-    )
+class CategoryListView(PostListView):
+    allow_empty = False
+     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        page_title = f'Posts da categoria {self.object_list[0].category.name} - ' #type:ignore
+        context.update({
+            'page_title':page_title,
+        })
+        return context
+        
+    def get_queryset(self):
+        qs = super().get_queryset()
+        slug = self.kwargs.get('slug')
+        qs = qs.filter(category__slug=slug)
+        return qs
 
 def tag(request, slug):
     posts = Post.objects.get_published().filter(tags__slug=slug) #type:ignore
