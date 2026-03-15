@@ -1,8 +1,7 @@
 from typing import Any
 
-from django.core.paginator import Paginator
 from django.db.models.query import QuerySet
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from blog.models import Post, Page
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -81,27 +80,29 @@ class CategoryListView(PostListView):
         slug = self.kwargs.get('slug')
         qs = qs.filter(category__slug=slug)
         return qs
+    
 
-def tag(request, slug):
-    posts = Post.objects.get_published().filter(tags__slug=slug) #type:ignore
-    paginator = Paginator(posts, PER_PAGE)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+class TagListView(PostListView):
+    allow_empty = False
+    
+    def get_queryset(self):
+        qs = super().get_queryset()
+        slug = self.kwargs.get('slug')
+        qs = qs.filter(tags__slug=slug)
+        return qs
 
-    if len(page_obj) == 0:
-        raise Http404()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        slug = self.kwargs.get('slug')
+        page_title = (
+            f'Posts da tag {self.object_list[0] #type:ignore
+                            .tags.filter(slug=slug).first().name} - '
+                            )
+        context.update({
+            'page_title':page_title,
+        })
+        return context
 
-    page_title = f'Posts da tag {page_obj[0].tags.filter(slug=slug).first().name} - '
-
-
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': page_obj,
-            'page_title': page_title,
-        }
-    )
 
 def search(request):
     search_value = request.GET.get('search').strip()
