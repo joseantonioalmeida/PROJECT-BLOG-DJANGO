@@ -6,7 +6,7 @@ from blog.models import Post, Page
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.http import Http404, HttpRequest, HttpResponse
-from django.views.generic import ListView
+from django.views.generic import DetailView, ListView
 
 
 
@@ -132,6 +132,8 @@ class SearchListView(PostListView):
         if self._search_value == '':
             return redirect('blog:index')
         return super().get(request, *args, **kwargs)
+    
+
 def search(request):
     search_value = request.GET.get('search').strip()
     posts = (
@@ -159,27 +161,24 @@ def search(request):
         }
     )
 
+class PageDetailView(DetailView):
+    model = Page
+    template_name = 'blog/pages/page.html'
+    slug_field = 'slug'
+    context_object_name = 'page'
 
-def page(request, slug):
-    page_obj = (
-        Page.objects
-        .filter(is_published=True)
-        .filter(slug=slug)
-        .first()
-    )
-    if page_obj is None:
-        raise Http404()
-
-    page_title = f'{page_obj.title} - '
-
-    return render(
-        request,
-        'blog/pages/page.html',
-        {
-            'page': page_obj,
-            'page_title': page_title,
-        }
-    )
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        page = self.get_object()
+        page_title = f'{page.title} - Página - '  #type:ignore
+        context.update({
+            'page_title':page_title,
+        })
+        return context
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super().get_queryset()
+            .filter(is_published=True))
 
 
 def post(request, slug):
