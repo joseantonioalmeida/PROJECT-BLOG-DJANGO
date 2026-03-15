@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,6 +20,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # /data/web/static
 # /data/web/media
 DATA_DIR = BASE_DIR.parent / 'data' / 'web'
+
+# Dotenv
+load_dotenv(BASE_DIR.parent / 'dotenv_files' / '.env', override=True)
 
 
 # Quick-start development settings - unsuitable for production
@@ -52,6 +56,9 @@ INSTALLED_APPS = [
 
     # Summernote
     'django_summernote',
+
+    #axes
+    'axes',
 ]
 
 MIDDLEWARE = [
@@ -62,6 +69,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Tem que ser no último lugar
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -142,6 +152,11 @@ MEDIA_URL = '/media/'
 # /data/web/media
 MEDIA_ROOT = DATA_DIR / 'media'
 
+AUTHENTICATION_BACKENDS = {
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+}
+
 
 SUMMERNOTE_CONFIG = {
     'summernote' : {
@@ -168,3 +183,7 @@ SUMMERNOTE_CONFIG = {
     'attachment_model': 'blog.PostAttachment',
 }
 
+AXES_ENABLED = True
+AXES_FAILURE_LIMIT = 3 # 6 tentativas
+AXES_COOLOFF_TIME = 1 # 1 hora
+AXES_RESET_ON_SUCESS = True
